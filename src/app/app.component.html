@@ -1,0 +1,14 @@
+<header class="navbar navbar-fixed-top navbar-expand-lg">
+  <mat-grid-list cols="2" rowHeight="fit">
+    <mat-grid-tile class="text-left">
+      <a class="navbar-brand logo" [routerLink]="['/']">&nbsp;</a>
+    </mat-grid-tile>
+    <mat-grid-tile class="text-right">
+      <a class="icon" href="https://github.com/mvesign" target="_blank"><span class="fab fa-github"></span></a>
+      <a class="icon" href="https://twitter.com/mvesign" target="_blank"><span class="fab fa-twitter"></span></a>
+    </mat-grid-tile>
+  </mat-grid-list>
+</header>
+<div class="container">
+    <router-outlet></router-outlet>
+</div>

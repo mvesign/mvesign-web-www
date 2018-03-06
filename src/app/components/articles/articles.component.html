@@ -1,0 +1,21 @@
+<div class="row">
+  <div class="col-4 article-container" *ngFor="let article of articles">
+    <div class="article">
+      <a routerLink="/article/{{article.reference}}">
+        <div class="title">{{article.title}}</div>
+      </a>
+      <div class="created">
+        <span class="fas fa-clock"></span>{{article.createdOn | date:'d MMMM, yyyy'}}
+      </div>
+      <div class="labels">
+        <span class="fas fa-tags"></span>
+        <span *ngIf="article.tags?.length > 0">
+          <span *ngFor="let tag of article.tags">
+            <a routerLink="/tag/{{tag | urlEncode}}">{{tag}}</a>
+          </span>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+<!--TODO Pagination-->

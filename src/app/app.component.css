@@ -1,0 +1,40 @@
+header {
+    background-color: #3B6B6C;
+    border-bottom: 7px solid #7BABAC;
+    height: 50px;
+}
+
+.icon {
+    color: #A7AEA8;
+    font-size: 1.8em;
+    padding: 0 20px 0 0;
+}
+
+.icon:hover {
+    color: #EEF0EE;
+}
+
+.logo {
+    background-image: url("../assets/logo.png");
+    background-position: 0 0;
+    background-repeat: no-repeat;
+    border: none;
+    display: block;
+    height: 38px;
+    margin: 0 20px;
+    transition: all 0.4s ease-in 0s;
+    width: 141px;
+    -moz-transition: all 0.4s ease-in 0s;
+    -ms-transition: all 0.4s ease-in 0s;
+    -o-transition: all 0.4s ease-in 0s;
+    -webkit-transition: all 0.4s ease-in 0s;
+}
+
+.logo:hover {
+    background-position: 0 -38px;
+    border: none;
+}
+
+.mat-grid-list {
+    position: unset;
+}

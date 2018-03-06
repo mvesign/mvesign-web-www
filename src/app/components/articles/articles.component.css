@@ -1,0 +1,39 @@
+a {
+    color: #525654;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+a:hover, a:focus {
+    color: #EC971F;
+    text-decoration: none;
+}
+
+.article {
+    background-color: #FFF;
+    border: 1px solid #DDD;
+    border-radius: 5px;
+    height: 175px;
+    padding: 15px 10px;
+}
+
+.article-container {
+    padding: 10px;
+}
+
+.created, .labels  {
+    color: #878787;
+    font-size: 0.7em;
+    margin: 5px 0;
+    padding: 0 20px 0 5px;
+}
+
+.created svg, .labels svg {
+    margin-right: 5px;
+    width: 18px;
+}
+
+.title {
+    font-size: 1.4em;
+    height: 95px;
+}
