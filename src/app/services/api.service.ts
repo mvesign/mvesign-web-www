@@ -37,14 +37,14 @@ export class ApiService {
     }
 
     retrieveArticleSummary(): Observable<IArticleSummary> {
-        return this.http.get<IArticleSummary>(environment.API_URL + `articles/summary`, this.defaultConfig)
+        return this.http.get<IArticleSummary>(environment.API_URL + `summary/articles`, this.defaultConfig)
             .catch((error: Response): ObservableInput<any> => {
                 return Observable.throw("Could not retrieve summary of articles.");
             });
     }
 
     retrieveArticleSummaryByTag(tag: string): Observable<IArticleSummary> {
-        return this.http.get<IArticleSummary>(environment.API_URL + `tags/` + tag + `/summary`, this.defaultConfig)
+        return this.http.get<IArticleSummary>(environment.API_URL + `summary/tags/` + tag, this.defaultConfig)
             .catch((error: Response): ObservableInput<any> => {
                 return Observable.throw("Could not retrieve summary of articles.");
             });
