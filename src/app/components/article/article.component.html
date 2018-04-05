@@ -1,21 +1,31 @@
 <div class="row">
-  <div *ngIf="article">
+  <div class="col-12" *ngIf="article">
     <div class="article">
-      <a routerLink="/article/{{article.reference}}">
-        <div class="title">{{article.title}}</div>
-      </a>
-      <div class="created">
-        <span class="fas fa-clock"></span>{{article.createdOn | date:'d MMMM, yyyy'}}
+      <div class="header">
+        <a routerLink="/article/{{article.reference}}">
+          <div class="title">{{article.title}}</div>
+        </a>
+        <div class="row">
+          <div class="col-sm-2">
+            <div class="created">
+              <span class="fas fa-clock"></span>{{article.createdOn | date:'d MMMM, yyyy'}}
+            </div>
+          </div>
+          <div class="col">
+            <div class="labels">
+              <span class="fas fa-tags"></span>
+              <span *ngIf="article.tags?.length > 0">
+                <span *ngFor="let tag of article.tags; let isLast=last">
+                  <a routerLink="/tag/{{tag | urlEncode}}">{{tag}}</a>{{isLast ? '' : ', '}}
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="labels">
-        <span class="fas fa-tags"></span>
-        <span *ngIf="article.tags?.length > 0">
-          <span *ngFor="let tag of article.tags">
-            <a routerLink="/tag/{{tag | urlEncode}}">{{tag}}</a>
-          </span>
-        </span>
+      <div class="content">
+        {{article.content}}
       </div>
     </div>
   </div>
 </div>
-<!--TODO Pagination-->

@@ -1,0 +1,41 @@
+a {
+    color: #525654;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+a:hover, a:focus {
+    color: #EC971F;
+    text-decoration: none;
+}
+
+.article {
+    background-color: #FFF;
+    border: 1px solid #DDD;
+    border-radius: 5px;
+    margin: 10px 0;
+    padding: 15px 10px;
+}
+
+.created, .labels  {
+    color: #878787;
+    font-size: 0.7em;
+    margin: 5px 0;
+    padding: 0 20px 0 5px;
+}
+
+.created svg, .labels svg {
+    margin-right: 5px;
+    width: 18px;
+}
+
+.header {
+    margin: 0 10px 20px 10px;
+    padding: 0 20px 20px 20px;
+    border-bottom: 1px solid #DDD;
+}
+
+.title {
+    font-size: 2.5em;
+    padding-bottom: 10px;
+}
