@@ -1,9 +1,10 @@
 export interface IArticle {
     reference: string;
     title: string;
-    content: string;
     createdOn: Date;
     tags: string[];
+    snippets: ISnippet[];
+    references: string[];
 }
 
 export interface IArticleSummary {
@@ -11,4 +12,10 @@ export interface IArticleSummary {
     itemsPerPage: number;
     numberOfItems: number;
     numberOfPages: number;
+}
+
+export interface ISnippet {
+    value: string;
+    highlight: boolean;
+    language: string;
 }

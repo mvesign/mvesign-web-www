@@ -8,8 +8,8 @@ import {IArticle, IArticleSummary} from '../../services/api.interface';
   styleUrls: ['./articles.component.css']
 })
 export class ArticlesComponent implements OnInit {
-  private articles: IArticle[];
-  private articleSummary: IArticleSummary;
+  public articles: IArticle[];
+  public articleSummary: IArticleSummary;
 
   @Input() public tag?: string;
 

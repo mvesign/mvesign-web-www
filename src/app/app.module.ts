@@ -6,6 +6,7 @@ import {RouteReuseStrategy} from '@angular/router';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {MatButtonModule, MatCheckboxModule} from '@angular/material';
 import {MatGridListModule} from '@angular/material/grid-list';
+import { PrismModule } from '@ngx-prism/core';
 
 import {AppComponent} from './app.component';
 import {AppRoutingModule} from './app-routing.module';
@@ -27,7 +28,8 @@ import { TagComponent } from './components/tag/tag.component';
     MatButtonModule,
     MatCheckboxModule,
     MatGridListModule,
-    AppRoutingModule
+    AppRoutingModule,
+    PrismModule 
   ],
   declarations: [
     AppComponent,

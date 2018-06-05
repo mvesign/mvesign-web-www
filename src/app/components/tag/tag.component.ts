@@ -7,8 +7,8 @@ import {ActivatedRoute} from '@angular/router';
   styleUrls: ['./tag.component.css']
 })
 export class TagComponent implements OnInit, OnDestroy {
-  private tag: string;
-  private routeSubscription: any;
+  public tag: string;
+  public routeSubscription: any;
 
   constructor(private route: ActivatedRoute) {
     this.routeSubscription = this.route.params.subscribe(params => {

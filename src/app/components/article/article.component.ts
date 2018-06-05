@@ -9,8 +9,8 @@ import {IArticle, IArticleSummary} from '../../services/api.interface';
   styleUrls: ['./article.component.css']
 })
 export class ArticleComponent implements OnInit, OnDestroy {
-  private article: IArticle;
-  private routeSubscription: any;
+  public article: IArticle;
+  public routeSubscription: any;
 
   constructor(
     private route: ActivatedRoute,

@@ -17,11 +17,16 @@ a:hover, a:focus {
     padding: 15px 10px;
 }
 
+.content {
+    padding: 0 10px 10px 10px;
+}
+
 .created, .labels  {
     color: #878787;
     font-size: 0.7em;
     margin: 5px 0;
-    padding: 0 20px 0 5px;
+    /* padding: 0 20px 0 5px; */
+    padding-right: 20px;
 }
 
 .created svg, .labels svg {
@@ -31,8 +36,29 @@ a:hover, a:focus {
 
 .header {
     margin: 0 10px 20px 10px;
-    padding: 0 20px 20px 20px;
-    border-bottom: 1px solid #DDD;
+    /* padding: 0 20px 10px 20px; */
+    padding-bottom: 10px;
+    border-bottom: 3px double #DDD;
+}
+
+.reference-header {
+    font-weight: bold;
+    padding: 5px 0;
+}
+
+.references {
+    margin: 10px 10px 0 10px;
+    padding-top: 5px;
+    border-top: 3px double #DDD;
+    font-size: 0.8em;
+}
+
+.references li a {
+    color: #999;
+}
+
+.references ul {
+    margin-bottom: 10px;
 }
 
 .title {
