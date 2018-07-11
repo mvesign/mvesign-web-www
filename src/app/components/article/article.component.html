@@ -29,9 +29,6 @@
           <div *ngSwitchCase="'text'">{{snippet.value}}</div>
           <div *ngSwitchCase="'code'">
             <prism language="{{snippet.language}}">{{snippet.value}}</prism>
-            <!-- <prism language="csharp">public const string Value = "Some value";</prism> -->
-            <!-- <prism language="css">.my-class {{'{'}} color: #ccc; }</prism> -->
-            <!-- <prism language="typescript">console.log('Hello world!');</prism> -->
           </div>
           <div *ngSwitchCase="'image'">
             <img src="{{snippet.value}}" alt="{{snippet.value}}">
