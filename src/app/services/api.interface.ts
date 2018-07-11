@@ -15,7 +15,7 @@ export interface IArticleSummary {
 }
 
 export interface ISnippet {
+    type: string;
     value: string;
-    highlight: boolean;
     language: string;
 }

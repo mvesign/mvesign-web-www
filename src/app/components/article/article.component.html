@@ -25,18 +25,24 @@
         </div>
       </div>
       <div class="content">
-        <div *ngFor="let snippet of article.snippets">
-          <div *ngIf="!snippet.highlight;else highlight_snippet">{{snippet.value}}</div>
-          <ng-template #highlight_snippet>
-            <ngx-prism language="{{snippet.language}}">{{snippet.value}}</ngx-prism>
-          </ng-template>
+        <div *ngFor="let snippet of article.snippets" [ngSwitch]="snippet.type">
+          <div *ngSwitchCase="'text'">{{snippet.value}}</div>
+          <div *ngSwitchCase="'code'">
+            <prism language="{{snippet.language}}">{{snippet.value}}</prism>
+            <!-- <prism language="csharp">public const string Value = "Some value";</prism> -->
+            <!-- <prism language="css">.my-class {{'{'}} color: #ccc; }</prism> -->
+            <!-- <prism language="typescript">console.log('Hello world!');</prism> -->
+          </div>
+          <div *ngSwitchCase="'image'">
+            <img src="{{snippet.value}}" alt="{{snippet.value}}">
+          </div>
         </div>
       </div>
       <div class="references" *ngIf="article.references.length > 0">
         <div class="reference-header">References</div>
         <ul>
           <li *ngFor="let reference of article.references">
-            <a href="{{reference}}">{{reference}}</a>
+            <a href="{{reference}}" target="_blank">{{reference}}</a>
           </li>
         </ul>
       </div>
