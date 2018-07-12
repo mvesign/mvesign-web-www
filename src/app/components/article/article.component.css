@@ -9,6 +9,11 @@ a:hover, a:focus {
     text-decoration: none;
 }
 
+img {
+    width: 100%;
+    max-width: 500px;
+}
+
 .article {
     background-color: #FFF;
     border: 1px solid #DDD;
