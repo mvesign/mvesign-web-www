@@ -27,7 +27,7 @@
       <div class="content">
         <div *ngFor="let snippet of article.snippets" [ngSwitch]="snippet.type">
           <div *ngSwitchCase="'text'">{{snippet.value}}</div>
-          <div *ngSwitchCase="'code'">
+          <div *ngSwitchCase="'code'" class="code">
             <prism language="{{snippet.language}}">{{snippet.value}}</prism>
           </div>
           <div *ngSwitchCase="'image'">
