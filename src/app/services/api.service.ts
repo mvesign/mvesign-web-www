@@ -23,7 +23,7 @@ export class ApiService {
     }
 
     retrieveArticles(): Observable<IArticle[]> {
-        return this.http.get<IArticle[]>(environment.API_URL + `articles/`, this.defaultConfig)
+        return this.http.get<IArticle[]>(environment.API_URL + `articles`, this.defaultConfig)
             .catch((error: Response): ObservableInput<any> => {
                 return Observable.throw("Could not retrieve articles.");
             });
