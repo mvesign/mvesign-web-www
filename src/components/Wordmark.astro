@@ -1,0 +1,7 @@
+---
+// Het woordmerk rechtstreeks in de HTML, zodat CSS de groep .mv goud kan maken.
+import svg from 'mvesign-brand-assets/logo/wordmark.svg?raw';
+
+const inline = svg.replace('<svg ', '<svg aria-hidden="true" focusable="false" ');
+---
+<Fragment set:html={inline} />

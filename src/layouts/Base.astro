@@ -1,0 +1,56 @@
+---
+// De pagina: balk met woordmerk en menu, de inhoud, en de footer.
+import 'mvesign-brand-assets/fonts.css';
+import 'mvesign-brand-assets/tokens.css';
+import '../styles/site.css';
+import Meta from '../components/Meta.astro';
+import Wordmark from '../components/Wordmark.astro';
+import { SITE } from '../site';
+
+interface Props {
+  title?: string;
+  description: string;
+  type?: 'website' | 'article';
+  published?: Date;
+  isErrorPage?: boolean;
+}
+
+const nav = [
+  { href: '/notes/', label: 'Notities' },
+  { href: '/projects/', label: 'Projecten' },
+  { href: '/about/', label: 'Over mij' },
+];
+const current = Astro.url.pathname;
+---
+<!doctype html>
+<html lang="nl">
+  <head>
+    <Meta {...Astro.props} />
+  </head>
+  <body>
+    <a class="skip" href="#inhoud">Naar de inhoud</a>
+    <header class="bar">
+      <div class="bar-inner">
+        <a class="brand" href="/" aria-label="mvesign, naar home"><Wordmark /></a>
+        <nav aria-label="Hoofdmenu">
+          <ul>
+            {nav.map((item) => (
+              <li><a aria-current={current.startsWith(item.href) ? 'page' : undefined} href={item.href}>{item.label}</a></li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main id="inhoud">
+      <slot />
+    </main>
+    <footer class="footer">
+      <ul>
+        <li><a href={SITE.links.github}>GitHub</a></li>
+        <li><a href={SITE.links.linkedin}>LinkedIn</a></li>
+        <li><a href={SITE.links.stackoverflow}>Stack Overflow</a></li>
+        <li><a href="/rss.xml">RSS</a></li>
+      </ul>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,11 @@
+---
+import Base from '../../layouts/Base.astro';
+import NoteList from '../../components/NoteList.astro';
+import { getNotes } from '../../lib/content';
+
+const notes = await getNotes();
+---
+<Base title="Notities" description="Korte notities over problemen die ik tegenkwam in mijn werk, en hoe ik ze oploste.">
+  <h1>Notities</h1>
+  <NoteList notes={notes} />
+</Base>

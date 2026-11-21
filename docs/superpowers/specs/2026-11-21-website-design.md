@@ -311,7 +311,7 @@ Ze vervallen omdat ze uitleg van bekende patronen zijn zonder eigen ervaring. Ac
 2. **Bouwen** volgens het plan, met PR's naar `main`. Zolang `DEPLOY_ENABLED` ontbreekt, uploadt een push naar `main` niets.
 3. **Inhoud:** de twee notities, de projecten, Over mij.
 4. **mijn.host** (jij):
-   - in DirectAdmin een FTP-account aanmaken dat alleen bij `domains/mvesign.com/public_html` kan;
+   - in het controlepaneel van mijn.host (*Webhosting* → pakket → *FTP accounts*) een FTP-account aanmaken dat alleen bij `domains/mvesign.com/public_html` kan (*Hoofdmap*: *Map zelf opgeven*);
    - een back-up van de huidige `public_html` downloaden (zip). Dat is de terugvaloptie.
 5. **GitHub** (jij): de omgeving `mijn-host` maken, alleen voor `main`, met de drie secrets; Renovate toegang geven tot het repo.
 6. **Proefrun:** de workflow handmatig starten met `dry_run: true`. In de lijst hoort te staan dat de oude bestanden (`build/`, `global.css`) verdwijnen en dat de nieuwe erbij komen. `.well-known/` hoort er niet in te staan.
@@ -322,7 +322,7 @@ Ze vervallen omdat ze uitleg van bekende patronen zijn zonder eigen ervaring. Ac
    - de 404-pagina;
    - de cache-headers;
    - een notitie in de LinkedIn Post Inspector, die ook de preview ververst van links die al eerder gedeeld zijn.
-9. **Terugdraaien**, als het misgaat: de zip uit stap 4 terugzetten in DirectAdmin.
+9. **Terugdraaien**, als het misgaat: in DirectAdmin eerst `public_html` leegmaken (behalve `.well-known/`) en dan de zip uit stap 4 terugzetten.
 
 ### Opruimen
 

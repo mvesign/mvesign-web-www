@@ -1,0 +1,39 @@
+---
+// Alles in <head>: titel, beschrijving, canonical, Open Graph en iconen.
+import faviconUrl from 'mvesign-brand-assets/logo/favicon.svg?url&no-inline';
+import appleTouchIconUrl from 'mvesign-brand-assets/logo/apple-touch-icon.png?url&no-inline';
+import { SITE } from '../site';
+
+interface Props {
+  title?: string;
+  description: string;
+  type?: 'website' | 'article';
+  published?: Date;
+  isErrorPage?: boolean;
+}
+
+const { title, description, type = 'website', published, isErrorPage = false } = Astro.props;
+const fullTitle = title ? `${title} · mvesign` : 'mvesign';
+const url = new URL(Astro.url.pathname, SITE.url).href;
+const image = new URL('/og-default.png', SITE.url).href;
+---
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light dark" />
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+{isErrorPage ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={url} />}
+<meta property="og:site_name" content="mvesign" />
+<meta property="og:locale" content="nl_NL" />
+<meta property="og:type" content={type} />
+<meta property="og:title" content={title ?? 'mvesign'} />
+<meta property="og:description" content={description} />
+{!isErrorPage && <meta property="og:url" content={url} />}
+<meta property="og:image" content={image} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+{published && <meta property="article:published_time" content={published.toISOString()} />}
+<link rel="icon" href={faviconUrl} type="image/svg+xml" />
+<link rel="apple-touch-icon" href={appleTouchIconUrl} />
+<link rel="manifest" href="/site.webmanifest" />
+<link rel="alternate" type="application/rss+xml" title="mvesign" href="/rss.xml" />
