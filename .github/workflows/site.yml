@@ -46,3 +46,58 @@ jobs:
           include-hidden-files: true # .htaccess en _astro/.htaccess
           if-no-files-found: error
           retention-days: 7
+
+  # Zet dist/ op mijn.host. Op een push naar main alleen als de repo-variabele DEPLOY_ENABLED
+  # 'true' is; handmatig starten kan altijd (vanaf main), ook als proefrun (dry_run).
+  deploy:
+    needs: build
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'workflow_dispatch' ||
+       (github.event_name == 'push' && vars.DEPLOY_ENABLED == 'true'))
+    runs-on: ubuntu-24.04
+    environment: mijn-host
+    concurrency:
+      group: deploy
+      cancel-in-progress: false
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dist
+          path: dist
+
+      - name: lftp installeren
+        run: sudo apt-get update && sudo apt-get install -y lftp
+
+      # Ronde 1 zet de nieuwe bestanden in _astro/ klaar (nieuwe namen, dus geen botsing).
+      # Ronde 2 zet de rest neer en verwijdert wat niet meer in dist/ staat, behalve
+      # .well-known/ (het certificaat) en cgi-bin/ (DirectAdmin). Het wachtwoord gaat via
+      # LFTP_PASSWORD, dus niet in het script en niet op de opdrachtregel.
+      - name: Uploaden via FTPS
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          LFTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          DRY_RUN: ${{ inputs.dry_run && '--dry-run' || '' }}
+        run: |
+          cat > "$RUNNER_TEMP/upload.lftp" <<EOF
+          set cmd:fail-exit true
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set net:max-retries 2
+          open --env-password -u "$FTP_USERNAME" "ftp://$FTP_SERVER"
+          mirror --reverse --verbose $DRY_RUN dist/_astro /_astro
+          mirror --reverse --delete --verbose $DRY_RUN --exclude-glob .well-known/ --exclude-glob cgi-bin/ dist/ /
+          EOF
+          lftp -f "$RUNNER_TEMP/upload.lftp"
+
+      - name: Rooktest
+        if: ${{ !inputs.dry_run }}
+        run: |
+          curl -fsS https://mvesign.com/ | grep -q '<title>'
+          location=$(curl -sS -o /dev/null -w '%{redirect_url}' https://mvesign.com/article/sonarqube-serialization-pattern)
+          if [ "$location" != "https://mvesign.com/notes/sonarqube-serialization-pattern/" ]; then
+            echo "::error::De redirect van /article/ wijst naar '$location'"
+            exit 1
+          fi
