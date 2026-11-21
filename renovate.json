@@ -1,0 +1,26 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Houdt Astro en de integraties, Node (.nvmrc), de GitHub Actions en mvesign-brand-assets bij.",
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
+  "timezone": "Europe/Amsterdam",
+  "schedule": ["before 7am on monday"],
+  "prHourlyLimit": 0,
+  "major": {
+    "dependencyDashboardApproval": true
+  },
+  "packageRules": [
+    {
+      "description": "Alle kleine updates samen in één wekelijkse PR.",
+      "matchUpdateTypes": ["minor", "patch", "digest", "pin", "pinDigest"],
+      "groupName": "wekelijkse updates",
+      "groupSlug": "wekelijks"
+    },
+    {
+      "description": "Een nieuwe huisstijl kan de opmaak veranderen.",
+      "matchPackageNames": ["mvesign-brand-assets"],
+      "prBodyNotes": [
+        "Bekijk de site lokaal voordat je merget: `npm ci`, `npm run build` en `npm run preview`. Na de merge staat hij meteen live."
+      ]
+    }
+  ]
+}
