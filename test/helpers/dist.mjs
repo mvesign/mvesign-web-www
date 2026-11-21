@@ -34,3 +34,22 @@ export async function existsInDist(path) {
     return false;
   }
 }
+
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/** Alle waarden van content bij <meta name="key"> of <meta property="key">. */
+export function metaAll(html, key) {
+  const re = new RegExp(`<meta (?:name|property)="${escapeRegExp(key)}" content="([^"]*)"`, 'g');
+  return [...html.matchAll(re)].map((match) => match[1]);
+}
+
+/** Alle href's bij <link rel="rel" href="...">. */
+export function linkHrefs(html, rel) {
+  const re = new RegExp(`<link rel="${escapeRegExp(rel)}" href="([^"]*)"`, 'g');
+  return [...html.matchAll(re)].map((match) => match[1]);
+}
+
+/** De volledige URL van een pagina in dist/: notes/foo/index.html wordt https://mvesign.com/notes/foo/. */
+export function pageUrl(page) {
+  return `https://mvesign.com/${page.replace(/index\.html$/, '')}`;
+}
