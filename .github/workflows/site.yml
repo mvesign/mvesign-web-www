@@ -91,15 +91,24 @@ jobs:
           EOF
 
           # Ronde 2 en 3 verwijderen bestanden in de FTP-root. Dat is alleen veilig als het account
-          # op public_html is vastgezet. Staat er een map van het hele hostingaccount in de root,
-          # dan stoppen we vóór er iets wordt geüpload of verwijderd (ook bij een proefrun).
+          # op public_html is vastgezet. We stoppen vóór er iets wordt geüpload of verwijderd
+          # (ook bij een proefrun) als:
+          #  1. er een map van het hele hostingaccount in de root staat (domains, public_html, ...), of
+          #  2. er geen index.html in de root staat. Die staat in de oude site, in een verse
+          #     public_html en in deze site, dus een root zonder index.html is niet de websitemap
+          #     (bijvoorbeeld domains/ of public_ftp).
           cat > "$RUNNER_TEMP/list.lftp" <<EOF
           source "$RUNNER_TEMP/connect.lftp"
           cls -1a /
           EOF
           lftp -f "$RUNNER_TEMP/list.lftp" > "$RUNNER_TEMP/root-listing.txt"
-          if sed 's#/*$##; s#.*/##' "$RUNNER_TEMP/root-listing.txt" | grep -Exq 'domains|public_html|private_html|mail|.ssh'; then
+          sed 's#/*$##; s#.*/##' "$RUNNER_TEMP/root-listing.txt" > "$RUNNER_TEMP/root-names.txt"
+          if grep -Exq 'domains|public_html|private_html|mail|\.ssh' "$RUNNER_TEMP/root-names.txt"; then
             echo "::error::De FTP-root lijkt het hele hostingaccount te zijn, niet public_html. Uploaden gestopt."
+            exit 1
+          fi
+          if ! grep -Fxq index.html "$RUNNER_TEMP/root-names.txt"; then
+            echo "::error::De FTP-root bevat geen index.html en lijkt dus niet de websitemap public_html. Uploaden gestopt."
             exit 1
           fi
 
