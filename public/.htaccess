@@ -1,0 +1,36 @@
+# mvesign.com op LiteSpeed (mijn.host). Zie docs/superpowers/specs/2026-11-21-website-design.md, .htaccess.
+RewriteEngine On
+
+# 1. Altijd https en zonder www.
+RewriteCond %{HTTPS} !=on [OR]
+RewriteCond %{HTTP_HOST} ^www\. [NC]
+RewriteRule ^ https://mvesign.com%{REQUEST_URI} [R=301,L]
+
+# 2. De twee oude artikelen die notities zijn geworden.
+RewriteRule ^article/(sonarqube-serialization-pattern|dotnetcore-cancellation-tokens)/?$ https://mvesign.com/notes/$1/ [R=301,L]
+
+# 3. De vervallen design-pattern-artikelen: naar hun code.
+RewriteRule ^article/design-patterns-proxy/?$ https://github.com/mvesign/design-patterns/tree/main/DesignPatterns.Structural.Proxy [R=301,L]
+RewriteRule ^article/design-patterns-flyweight/?$ https://github.com/mvesign/design-patterns/tree/main/DesignPatterns.Structural.Flyweight [R=301,L]
+RewriteRule ^article/design-patterns-composite/?$ https://github.com/mvesign/design-patterns/tree/main/DesignPatterns.Structural.Composite [R=301,L]
+RewriteRule ^article/design-patterns-decorator/?$ https://github.com/mvesign/design-patterns/tree/main/DesignPatterns.Structural.Decorator [R=301,L]
+RewriteRule ^article/design-patterns-facade/?$ https://github.com/mvesign/design-patterns/tree/main/DesignPatterns.Structural.Facade [R=301,L]
+RewriteRule ^article/design-patterns-bridge/?$ https://github.com/mvesign/design-patterns/tree/main/DesignPatterns.Structural.Bridge [R=301,L]
+RewriteRule ^article/design-patterns-abstract-factory/?$ https://github.com/mvesign/design-patterns/tree/main/DesignPatterns.Creational.AbstractFactory [R=301,L]
+RewriteRule ^article/design-patterns-builder/?$ https://github.com/mvesign/design-patterns/tree/main/DesignPatterns.Creational.Builder [R=301,L]
+RewriteRule ^article/design-patterns-factory-method/?$ https://github.com/mvesign/design-patterns/tree/main/DesignPatterns.Creational.FactoryMethod [R=301,L]
+RewriteRule ^article/design-patterns-prototype/?$ https://github.com/mvesign/design-patterns/tree/main/DesignPatterns.Creational.Prototype [R=301,L]
+
+# 4. Tags hebben geen eigen pagina meer.
+RewriteRule ^tag/ https://mvesign.com/notes/ [R=301,L]
+
+# 5. De foutpagina.
+ErrorDocument 404 /404.html
+
+# 6. HTML: bij elk bezoek controleren, zodat een nieuwe notitie meteen zichtbaar is.
+#    De bestanden in _astro/ hebben een eigen .htaccess (een jaar, immutable).
+<IfModule mod_headers.c>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>

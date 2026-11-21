@@ -1,0 +1,4 @@
+# Bestanden in _astro/ hebben een hash in de naam: verandert de inhoud, dan verandert de naam.
+<IfModule mod_headers.c>
+  Header set Cache-Control "public, max-age=31536000, immutable"
+</IfModule>
