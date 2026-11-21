@@ -6,7 +6,7 @@ Het ontwerp en de redenen staan in [de spec](docs/superpowers/specs/2026-11-21-w
 
 ## Lokaal werken
 
-Je hebt Node 26 nodig (zie `.nvmrc`); Astro weigert lager dan 22.23.4.
+Je hebt Node 26 nodig; Astro weigert lager dan 22.23.4. Met Volta kiest de repo zelf Node 26 (de `volta`-sleutel in `package.json`); `.nvmrc` is wat CI gebruikt.
 
 ```powershell
 npm ci
@@ -50,4 +50,4 @@ Renovate opent elke maandag één PR met de kleine updates (Astro, Node, de acti
 
 ## Terugdraaien
 
-Revert de commit op `main`; de workflow zet de vorige versie terug. Is de hosting zelf kapot, zet dan in DirectAdmin de back-up van `public_html` terug.
+Revert de commit op `main`; de workflow zet de vorige versie terug, maar alleen als de repo-variabele `DEPLOY_ENABLED` op `true` staat. Anders start je de workflow met de hand (Actions → Site → *Run workflow* op `main`). Is de hosting zelf kapot, zet dan in DirectAdmin de back-up van `public_html` terug.
