@@ -1,0 +1,37 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Tags from '../../components/Tags.astro';
+import { getNotes, type Note } from '../../lib/content';
+import { formatDate, isoDate } from '../../lib/format';
+import { SITE } from '../../site';
+
+export async function getStaticPaths() {
+  const notes = await getNotes();
+  return notes.map((note) => ({ params: { slug: note.id }, props: { note } }));
+}
+
+interface Props {
+  note: Note;
+}
+
+const { note } = Astro.props;
+const { Content } = await render(note);
+const pageOnGitHub = `${SITE.repo}/blob/main/src/content/notes/${note.id}.md`;
+---
+<Base title={note.data.title} description={note.data.description} type="article" published={note.data.date}>
+  <article>
+    <header>
+      <h1>{note.data.title}</h1>
+      <p class="meta-line"><time datetime={isoDate(note.data.date)}>{formatDate(note.data.date)}</time></p>
+      <Tags tags={note.data.tags} />
+    </header>
+    <div class="prose">
+      <Content />
+    </div>
+    <footer class="source-links">
+      {note.data.source && <a href={note.data.source}>Bekijk de code op GitHub</a>}
+      <a href={pageOnGitHub}>Bekijk deze pagina op GitHub</a>
+    </footer>
+  </article>
+</Base>
