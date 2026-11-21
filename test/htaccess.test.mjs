@@ -19,8 +19,13 @@ const DESIGN_PATTERNS = {
 
 test('https en zonder www, als eerste regel', () => {
   const firstRule = htaccess.indexOf('RewriteRule');
-  assert.ok(htaccess.indexOf('RewriteCond %{HTTPS} !=on [OR]') < firstRule);
-  assert.ok(htaccess.indexOf('RewriteCond %{HTTP_HOST} ^www\. [NC]') < firstRule);
+  const httpsCond = htaccess.indexOf('RewriteCond %{HTTPS} !=on [OR]');
+  const wwwCond = htaccess.indexOf('RewriteCond %{HTTP_HOST} ^www\\. [NC]');
+  assert.ok(firstRule >= 0, 'geen RewriteRule');
+  assert.ok(httpsCond >= 0, 'RewriteCond voor https ontbreekt');
+  assert.ok(wwwCond >= 0, 'RewriteCond voor www ontbreekt');
+  assert.ok(httpsCond < firstRule);
+  assert.ok(wwwCond < firstRule);
   assert.ok(htaccess.includes('RewriteRule ^ https://mvesign.com%{REQUEST_URI} [R=301,L]'));
 });
 
