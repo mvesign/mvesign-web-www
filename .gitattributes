@@ -1,0 +1,5 @@
+# Alles LF, ook op Windows (core.autocrlf=true).
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.woff2 binary

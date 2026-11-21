@@ -1,0 +1,28 @@
+{
+  "name": "mvesign-web-www",
+  "private": true,
+  "description": "De website mvesign.com: notities, projecten en over mij.",
+  "license": "SEE LICENSE IN LICENSE",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "dependencies": {
+    "@astrojs/rss": "4.0.19",
+    "@astrojs/sitemap": "3.7.6",
+    "astro": "7.4.13",
+    "mvesign-brand-assets": "github:mvesign/mvesign-brand-assets#v1.0.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.12",
+    "@resvg/resvg-wasm": "2.6.2",
+    "typescript": "6.0.3"
+  },
+  "volta": {
+    "node": "26.13.1"
+  }
+}
