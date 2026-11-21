@@ -30,7 +30,7 @@ Deze keuzes staan vast en worden hier niet opnieuw afgewogen:
 - **Onderdelen:** Notities, Projecten en Over mij. Een log komt later.
 - **Huisstijl:** `mvesign-brand-assets`, variant A, als npm-pakket.
 - **Oude artikelen:** twee blijven en worden vertaald, tien vervallen (zie *Overstap*).
-- **Upload:** FTPS met een eigen FTP-account dat alleen bij `public_html` kan.
+- **Upload:** SFTP (poort 22) met een eigen FTP-account dat alleen bij `public_html` kan. (Eerst FTPS; gewijzigd op 22 november 2026, zie *Beslissingen*.)
 - **Geen** JavaScript in de pagina's, geen analytics, geen cookies en geen scripts van derden.
 - **De oude repo's** (`-articles`, `-api`, `-frontend`, `-images` en een eventueel oud `-www`) mogen weg.
 
@@ -43,7 +43,7 @@ Deze keuzes staan vast en worden hier niet opnieuw afgewogen:
 | Tags | Alleen als label bij een notitie, zonder eigen pagina | Twee notities; een pagina per tag voegt niets toe |
 | Deelafbeelding | Eén voor de hele site, gemaakt bij de build | Een afbeelding per notitie met de titel vraagt Open Sans als TTF, en de huisstijl levert alleen woff2. LinkedIn toont de titel toch al naast de afbeelding. |
 | Licht en donker | Volgt de systeeminstelling, geen knop | Geen JavaScript nodig; `tokens.css` regelt het |
-| Upload | FTPS, niet SSH met rsync | Een SSH-sleutel geeft toegang tot het hele hostingaccount, ook de mail. Een FTP-account kan alleen bij de site. |
+| Upload | SFTP met het FTP-account; niet SSH met rsync en niet FTPS | Een SSH-sleutel van het hoofdaccount geeft toegang tot het hele hostingaccount, ook de mail; het FTP-account kan alleen bij de site, ook via SFTP. FTPS viel af bij de eerste proefrun: de FTP-server van mijn.host stuurt zijn certificaat zonder tussencertificaat (Let's Encrypt YE1), dus lftp weigert het terecht. SFTP heeft geen certificaatketen nodig (de sleutel van de server staat vast in de workflow), en mijn.host raadt het zelf aan. |
 | Updates | Renovate, één PR per week, die je zelf merget | Een update die de opmaak verandert, gaat niet ongezien live |
 | Twitter en Buy Me a Coffee | Weg | De widget laadt een script van een derde partij en past niet bij een showcase; Twitter wordt niet meer gebruikt (aanname) |
 | Licentie | De code onder MIT; de teksten in `src/content/` en `src/pages/about.md` alle rechten voorbehouden | Code vrij, de teksten niet. Het woordmerk en de favicon vallen onder de licentie van `mvesign-brand-assets`. |
@@ -204,7 +204,7 @@ LiteSpeed leest de Apache-regels in `.htaccess`. In deze volgorde:
 | Wanneer | Job | Stappen |
 |---|---|---|
 | Elke push en PR, en handmatig | `build` | Node volgens `.nvmrc`; `npm ci`; `npm run check`; `npm run build`; `npm test`. Bij een push naar `main` of handmatig: `dist/` als artifact bewaren. |
-| Push naar `main` als de repo-variabele `DEPLOY_ENABLED` `true` is, en handmatig vanaf `main` | `deploy` | Na `build`. Het artifact ophalen, `lftp` installeren, uploaden in twee rondes, daarna de rooktest. |
+| Push naar `main` als de repo-variabele `DEPLOY_ENABLED` `true` is, en handmatig vanaf `main` | `deploy` | Na `build`. Het artifact ophalen, `lftp` installeren, de map van het account controleren, uploaden in drie rondes, daarna de rooktest. |
 
 - **Rechten:** `contents: read`.
 - **`DEPLOY_ENABLED`** is een variabele van het repo (geen secret), zodat de voorwaarde van de job hem kan lezen. Zolang hij ontbreekt, uploadt een push naar `main` niets. Zo kan het bouwen beginnen voordat mijn.host klaar is, en is de eerste upload altijd een handmatige proefrun.
@@ -214,11 +214,15 @@ LiteSpeed leest de Apache-regels in `.htaccess`. In deze volgorde:
 
 ### Upload
 
-- **Verbinding:** FTPS met `set ftp:ssl-force true`, `set ftp:ssl-protect-data true` en `set ssl:verify-certificate true`.
-  - De server is de hostnaam van de server uit het controlepaneel van mijn.host, zodat de controle van het certificaat slaagt.
+- **Verbinding:** SFTP op poort 22, met `lftp` en `ssh` als transport.
+  - De publieke sleutel van de server (`h30.mijn.host`, RSA, `SHA256:6ybTN1+2KX9UBykPJK/JXP4rYN+YERJYvfpFEfl1btU`) staat vast in de workflow, met `StrictHostKeyChecking=yes` en `HostKeyAlias=h30.mijn.host`. Wijzigt de sleutel, dan stopt de uitrol; een nieuwe sleutel controleer je bij mijn.host voordat je hem vervangt.
   - Het wachtwoord gaat via `LFTP_PASSWORD` en `--env-password`, niet op de opdrachtregel.
-- **Ronde 1:** `mirror --reverse dist/_astro /_astro`, zonder verwijderen. Nieuwe bestanden met een hash staan klaar voordat de HTML ernaar verwijst.
-- **Ronde 2:** `mirror --reverse --delete --exclude-glob .well-known/ --exclude-glob cgi-bin/ dist/ /`. Wat niet meer in `dist/` staat, verdwijnt. `.well-known/` (het certificaat) en `cgi-bin/` (DirectAdmin) blijven staan.
+  - Alle paden zijn relatief aan de map waar het account na het inloggen staat (`public_html`).
+- **Controle vooraf:** de workflow stopt vóór elke upload, ook bij een proefrun, als die map `domains`, `public_html`, `private_html`, `mail` of `.ssh` bevat, of als `index.html` ontbreekt.
+- **Ronde 1:** `mirror --reverse dist/_astro _astro`, zonder verwijderen. Nieuwe bestanden met een hash staan klaar voordat de HTML ernaar verwijst.
+- **Ronde 2:** `mirror --reverse --delete --exclude-glob _astro/ --exclude-glob .well-known/ --exclude-glob cgi-bin/ dist/ .`. Wat niet meer in `dist/` staat, verdwijnt. `.well-known/` (het certificaat) en `cgi-bin/` (DirectAdmin) blijven staan.
+- **Ronde 3:** `mirror --reverse --delete dist/_astro _astro`: pas nu verdwijnen de oude bestanden in `_astro/`, als de HTML al naar de nieuwe verwijst.
+- Alle rondes gebruiken `--no-perms`: de rechten komen van de server, niet van de build.
 - **Rooktest:**
   - `https://mvesign.com/` geeft 200 en bevat `<title>`;
   - `https://mvesign.com/article/sonarqube-serialization-pattern` geeft 301 met `Location: https://mvesign.com/notes/sonarqube-serialization-pattern/`.
@@ -350,6 +354,7 @@ Bewust niet in de eerste versie:
 - **Hugo:** CSS-imports uit `node_modules` vragen extra werk, en de huisstijl gaat uit van npm en een bundler.
 - **Svelte of SvelteKit:** je werkt er liever niet mee. Het probleem van de huidige site zat in de opzet (alles in de browser), niet in Svelte zelf.
 - **SSH met rsync:** een SSH-sleutel geeft toegang tot het hele hostingaccount.
+- **FTPS:** de FTP-server van mijn.host stuurt geen tussencertificaat mee. Dat certificaat bij elke uitrol zelf ophalen en controleren zou kunnen, maar voegt bewegende delen toe die SFTP niet nodig heeft.
 - **De README van een repo als tekst van een project:** zie *Beslissingen*.
 - **Alle oude artikelen Engels laten, of alle twaalf vertalen:** tien passen niet bij de werkplaats, en twee vertalingen zijn snel nagelezen.
 - **Renovate automatisch laten mergen:** een update die de opmaak verandert, zou ongezien live gaan.

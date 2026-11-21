@@ -1,6 +1,6 @@
 # mvesign-web-www
 
-De website [mvesign.com](https://mvesign.com): notities, projecten en een pagina over mij. Astro bouwt er statische HTML van; GitHub Actions zet die via FTPS op de webhosting bij mijn.host. Op de pagina's staat geen JavaScript.
+De website [mvesign.com](https://mvesign.com): notities, projecten en een pagina over mij. Astro bouwt er statische HTML van; GitHub Actions zet die via SFTP op de webhosting bij mijn.host. Op de pagina's staat geen JavaScript.
 
 Het ontwerp en de redenen staan in [de spec](docs/superpowers/specs/2026-11-21-website-design.md).
 
@@ -42,7 +42,8 @@ Merge naar `main`. De workflow `Site` bouwt, test en zet de site op mijn.host; n
 
 - **Handmatig uitrollen:** Actions → Site → *Run workflow* op `main`. Met `dry_run` aan zie je alleen wat er zou veranderen.
 - **Automatisch uitrollen** staat aan zolang de repo-variabele `DEPLOY_ENABLED` `true` is (Settings → Secrets and variables → Actions → Variables).
-- **Inloggegevens:** de omgeving `mijn-host` (Settings → Environments), alleen voor `main`, met `FTP_SERVER`, `FTP_USERNAME` en `FTP_PASSWORD`. Het FTP-account kan alleen bij `public_html` van mvesign.com.
+- **Inloggegevens:** de omgeving `mijn-host` (Settings → Environments), alleen voor `main`, met `FTP_SERVER` (alleen de hostnaam, `h30.mijn.host`), `FTP_USERNAME` en `FTP_PASSWORD`. Het FTP-account kan alleen bij `public_html` van mvesign.com; de workflow logt ermee in via SFTP.
+- **Sleutel van de server:** staat vast in `.github/workflows/site.yml`. Vervangt mijn.host de server, dan stopt de uitrol met een fout over de host key. Controleer de nieuwe sleutel bij mijn.host (`ssh-keyscan -t rsa h30.mijn.host`) voordat je hem in de workflow vervangt.
 
 ## Updates
 
@@ -50,4 +51,4 @@ Renovate opent elke maandag één PR met de kleine updates (Astro, Node, de acti
 
 ## Terugdraaien
 
-Revert de commit op `main`; de workflow zet de vorige versie terug, maar alleen als de repo-variabele `DEPLOY_ENABLED` op `true` staat. Anders start je de workflow met de hand (Actions → Site → *Run workflow* op `main`). Is de hosting zelf kapot, zet dan in DirectAdmin de back-up van `public_html` terug.
+Revert de commit op `main`; de workflow zet de vorige versie terug, maar alleen als de repo-variabele `DEPLOY_ENABLED` op `true` staat. Anders start je de workflow met de hand (Actions → Site → *Run workflow* op `main`). Is de hosting zelf kapot, maak dan in DirectAdmin `public_html` leeg (behalve `.well-known/`) en zet de back-up terug.

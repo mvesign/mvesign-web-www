@@ -69,54 +69,63 @@ jobs:
       - name: lftp installeren
         run: sudo apt-get update && sudo apt-get install -y lftp
 
+      # SFTP (poort 22) met het FTP-account, dat alleen bij public_html kan. De sleutel van de
+      # server staat hieronder vast: wijzigt die, dan stopt ssh en gaat er niets live. Controleer
+      # een nieuwe sleutel bij mijn.host voordat je hem hier vervangt (ssh-keyscan -t rsa h30.mijn.host).
+      # FTPS werkt niet: de FTP-server van mijn.host stuurt zijn certificaat zonder tussencertificaat.
+      #
       # Ronde 1 zet de nieuwe bestanden in _astro/ klaar (nieuwe namen, dus geen botsing).
       # Ronde 2 zet de rest neer en verwijdert wat niet meer in dist/ staat, behalve _astro/,
       # .well-known/ (het certificaat) en cgi-bin/ (DirectAdmin). Ronde 3 ruimt pas daarna de
       # oude bestanden in _astro/ op, als de HTML al naar de nieuwe verwijst. Het wachtwoord
-      # gaat via LFTP_PASSWORD, dus niet in het script en niet op de opdrachtregel.
-      - name: Uploaden via FTPS
+      # gaat via LFTP_PASSWORD, dus niet in het script en niet op de opdrachtregel. Alle paden
+      # zijn relatief aan de map waar het account na het inloggen staat.
+      - name: Uploaden via SFTP
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           LFTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           DRY_RUN: ${{ inputs.dry_run && '--dry-run' || '' }}
         run: |
-          cat > "$RUNNER_TEMP/connect.lftp" <<EOF
-          set cmd:fail-exit true
-          set ftp:ssl-force true
-          set ftp:ssl-protect-data true
-          set ssl:verify-certificate true
-          set net:max-retries 2
-          open --env-password -u "$FTP_USERNAME" "ftp://$FTP_SERVER"
+          cat > "$RUNNER_TEMP/known_hosts" <<'EOF'
+          h30.mijn.host ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDk4wWJODtvwmajzfIRdWPnq7XJckCK69bcIZiE/hz4t+GVA+ayrYOfj9w2v9E9jFmeHaM6EFEGq4Ne3x6LH87ApjiAdg4Z7QcjBMlvWHR8D0a1iDiLqGrCZ55h0AhwmL7gwwTusUWN4e6i943Ft306Go7gPrGmydtaQZZsBzdyOieNg4T7DOSmTbzMEdgcPgzsCnR0GWKI5SMp1DwyD+P0pd/Nft/tVEZQcFnxZatfp9dzn0MWG4aaS155fMYNsg3Kn8CDPthiii68cN+QnfrWWtSvIMgs5RKDCIxClkrP6C/gpjBnoH7iIQHKHKgl0uUnSyb/IkSmcBlDVN1spOY7hUgUPYTy2ZrH8xe/xjLXCV5o2RXMe/ZaiHeCPqRbqpU1OObDwRZJmiaUks5xDvzxwz098PZSVbznQiNGMxST06+a0PNpWnvJ6e4JAOGhmkHpXzPyb5lbp96SbE7d1KkHyi+H9t+fN07YyEOv6vEh50MSxC7qTk6j9AUt5JL7parILSXBrS4ZRy5z/LWM/ZIkuaChpR5yrgpIFeSekQphioCBN/RtOmMBVHvf5229fEtb2aAKI0NZsHPVaohaMwuH6w5vMsSylin4IR20s3QxaCxUA1hqvgAxH4tWM5wG6vDqwBhQRbikcctX03XipGpbBs8M9Vy/O8lYZ+n2jZuDew==
           EOF
 
-          # Ronde 2 en 3 verwijderen bestanden in de FTP-root. Dat is alleen veilig als het account
-          # op public_html is vastgezet. We stoppen vóór er iets wordt geüpload of verwijderd
-          # (ook bij een proefrun) als:
-          #  1. er een map van het hele hostingaccount in de root staat (domains, public_html, ...), of
-          #  2. er geen index.html in de root staat. Die staat in de oude site, in een verse
-          #     public_html en in deze site, dus een root zonder index.html is niet de websitemap
-          #     (bijvoorbeeld domains/ of public_ftp).
+          cat > "$RUNNER_TEMP/connect.lftp" <<EOF
+          set cmd:fail-exit true
+          set net:max-retries 2
+          set net:timeout 30
+          set sftp:auto-confirm no
+          set sftp:connect-program "ssh -a -x -o HostKeyAlias=h30.mijn.host -o UserKnownHostsFile=$RUNNER_TEMP/known_hosts -o StrictHostKeyChecking=yes -o PubkeyAuthentication=no -o NumberOfPasswordPrompts=1"
+          open --env-password -u "$FTP_USERNAME" "sftp://$FTP_SERVER"
+          EOF
+
+          # Ronde 2 en 3 verwijderen bestanden. Dat is alleen veilig als het account op
+          # public_html staat. We stoppen vóór er iets wordt geüpload of verwijderd (ook bij een
+          # proefrun) als:
+          #  1. er een map van het hele hostingaccount staat (domains, public_html, ...), of
+          #  2. er geen index.html staat. Die staat in de oude site, in een verse public_html en
+          #     in deze site, dus een map zonder index.html is niet de websitemap.
           cat > "$RUNNER_TEMP/list.lftp" <<EOF
           source "$RUNNER_TEMP/connect.lftp"
-          cls -1a /
+          cls -1a .
           EOF
           lftp -f "$RUNNER_TEMP/list.lftp" > "$RUNNER_TEMP/root-listing.txt"
           sed 's#/*$##; s#.*/##' "$RUNNER_TEMP/root-listing.txt" > "$RUNNER_TEMP/root-names.txt"
           if grep -Exq 'domains|public_html|private_html|mail|\.ssh' "$RUNNER_TEMP/root-names.txt"; then
-            echo "::error::De FTP-root lijkt het hele hostingaccount te zijn, niet public_html. Uploaden gestopt."
+            echo "::error::De map van het account lijkt het hele hostingaccount te zijn, niet public_html. Uploaden gestopt."
             exit 1
           fi
           if ! grep -Fxq index.html "$RUNNER_TEMP/root-names.txt"; then
-            echo "::error::De FTP-root bevat geen index.html en lijkt dus niet de websitemap public_html. Uploaden gestopt."
+            echo "::error::De map van het account bevat geen index.html en lijkt dus niet de websitemap public_html. Uploaden gestopt."
             exit 1
           fi
 
           cat > "$RUNNER_TEMP/upload.lftp" <<EOF
           source "$RUNNER_TEMP/connect.lftp"
-          mirror --reverse --verbose $DRY_RUN dist/_astro /_astro
-          mirror --reverse --delete --verbose $DRY_RUN --exclude-glob _astro/ --exclude-glob .well-known/ --exclude-glob cgi-bin/ dist/ /
-          mirror --reverse --delete --verbose $DRY_RUN dist/_astro /_astro
+          mirror --reverse --no-perms --verbose $DRY_RUN dist/_astro _astro
+          mirror --reverse --no-perms --delete --verbose $DRY_RUN --exclude-glob _astro/ --exclude-glob .well-known/ --exclude-glob cgi-bin/ dist/ .
+          mirror --reverse --no-perms --delete --verbose $DRY_RUN dist/_astro _astro
           EOF
           lftp -f "$RUNNER_TEMP/upload.lftp"
 
