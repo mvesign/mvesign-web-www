@@ -114,7 +114,7 @@ Collectie `projects`, uit `src/content/projects/*.md`.
 | `stack` | lijst van tekst, minstens één | ja | De gebruikte techniek |
 | `repo` | URL | nee | Alleen bij een openbaar repo |
 
-De tekst onder de gegevens zegt kort wat het project is, waarom je het maakte en wat er interessant aan is.
+De tekst onder de gegevens is een technische uitwerking van het project, verdeeld in `##`-secties: de aanleiding, de architectuur, de onderdelen die technisch het interessantst zijn, en de keuzes met de alternatieven die afvielen. Reken op 600 tot 1000 woorden, met korte code- of configuratiefragmenten waar die iets laten zien. Alles in de tekst is na te gaan in het repo. Bij een privé repo staan er geen adressen, accounts, netwerkdetails of code uit dat repo in. (Gewijzigd op 22 november 2026: eerst was de tekst kort.)
 
 ### Over mij
 
