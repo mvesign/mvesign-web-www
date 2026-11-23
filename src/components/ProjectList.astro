@@ -1,20 +1,19 @@
 ---
+import CardList from './CardList.astro';
 import type { Project } from '../lib/content';
 
-interface Props {
-  projects: Project[];
-  headingLevel?: 2 | 3;
-}
+type Props = { projects: Project[]; headingLevel?: 2 | 3 } & ({ layout?: 'grid' } | { layout: 'rail'; labelledby: string });
 
-const { projects, headingLevel = 2 } = Astro.props;
+const { projects, headingLevel = 2, ...list } = Astro.props;
 const Heading = headingLevel === 2 ? 'h2' : 'h3';
 ---
-<ul class="list">
+<CardList count={projects.length} {...list}>
   {projects.map((project) => (
-    <li>
+    <li class="card" data-title={project.data.title}>
       <Heading><a href={`/projects/${project.id}/`}>{project.data.title}</a></Heading>
       <p class="meta-line">{project.data.year} · {project.data.stack.join(', ')}</p>
       <p>{project.data.description}</p>
+      <p class="card-cta" aria-hidden="true">Bekijk het project <span>→</span></p>
     </li>
   ))}
-</ul>
+</CardList>

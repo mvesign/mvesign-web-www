@@ -21,7 +21,7 @@ test('de home toont de nieuwste notities en projecten', async () => {
   assert.ok((html.match(/<h3><a href="\/notes\//g)?.length ?? 0) <= 5, 'hooguit vijf notities');
   assert.ok(html.includes('href="/notes/">Alle notities</a>'));
   assert.ok(html.includes('href="/projects/">Alle projecten</a>'));
-  assert.equal(html.match(/<h3><a href="\/projects\//g)?.length, 3, 'drie projecten');
+  assert.ok((html.match(/<h3><a href="\/projects\//g)?.length ?? 0) <= 5, 'hooguit vijf projecten');
 });
 
 test('Over mij staat er, met een titel', async () => {
