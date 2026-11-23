@@ -1,0 +1,18 @@
+---
+// Een lijst met blokken: een grid op de overzichten, of een carousel (rail) op de home.
+// De rail is alleen CSS: een rij die op elk blok vastklikt. Hij krijgt tabindex, zodat je hem
+// met het toetsenbord kunt scrollen, en een naam via de kop van zijn sectie. Met data-count
+// laat de CSS de stippen weg als alle blokken al in beeld zijn.
+type Props = { count: number } & ({ layout?: 'grid' } | { layout: 'rail'; labelledby: string });
+
+const props = Astro.props;
+const isRail = props.layout === 'rail';
+---
+<ul
+  class:list={['cards', isRail ? 'cards-rail' : 'cards-grid']}
+  aria-labelledby={isRail ? props.labelledby : undefined}
+  tabindex={isRail ? 0 : undefined}
+  data-count={isRail ? props.count : undefined}
+>
+  <slot />
+</ul>

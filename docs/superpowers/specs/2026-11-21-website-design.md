@@ -128,10 +128,10 @@ De schema's staan in `src/content.config.ts`. Mist een verplicht veld of heeft e
 
 | Pad | Inhoud |
 |---|---|
-| `/` | Twee of drie zinnen over jou, hooguit vijf van de nieuwste notities en hooguit drie van de nieuwste projecten |
-| `/notes/` | Alle notities, nieuwste eerst: datum, titel, beschrijving, tags |
+| `/` | Twee of drie zinnen over jou, en twee carousels: hooguit vijf van de nieuwste notities en hooguit vijf van de nieuwste projecten (tot 23 november 2026: drie projecten, als lijst) |
+| `/notes/` | Alle notities, nieuwste eerst, als blokken: datum, titel, beschrijving, tags |
 | `/notes/<slug>/` | Titel, datum, tags en de tekst. Onderaan "Bekijk de code op GitHub" (als `source` is ingevuld) en "Bekijk deze pagina op GitHub" (naar `https://github.com/mvesign/mvesign-web-www/blob/main/src/content/notes/<slug>.md`) |
-| `/projects/` | Alle projecten, nieuwste jaar eerst, daarna op titel: titel, jaar, stack, beschrijving |
+| `/projects/` | Alle projecten, nieuwste jaar eerst, daarna op titel, als blokken: titel, jaar, stack, beschrijving |
 | `/projects/<slug>/` | De tekst, met een link naar het repo als `repo` is ingevuld |
 | `/about/` | Over mij |
 | `/404.html` | "Pagina niet gevonden", met links naar home en de notities |
@@ -151,7 +151,10 @@ De schema's staan in `src/content.config.ts`. Mist een verplicht veld of heeft e
 - **De balk:** achtergrond `--mv-bar`, onderaan een rand van `--mv-bar-edge-width` in `--mv-bar-edge`.
   - Links het woordmerk: `wordmark.svg` als `?raw` geïmporteerd en rechtstreeks in de HTML gezet. Bij aanwijzen krijgt `.mv` de kleur `--mv-accent`.
   - Rechts het menu in `--mv-on-bar`.
-- **Lezen:** één kolom van ongeveer 70 tekens breed, die ook op een telefoon past.
+- **Breedte:** de balk, de inhoud en de footer zijn hooguit 72rem breed, met een marge die meegroeit van 1 tot 2rem. (Tot 23 november 2026 was alles 46rem; op desktop bleef veel ruimte leeg.)
+- **Lezen:** lopende tekst blijft één kolom van ongeveer 70 tekens breed, die ook op een telefoon past.
+- **Blokken:** de overzichten tonen een grid van blokken, drie naast elkaar op desktop. Een blok heeft één link, in de titel, die het hele blok bedekt; de oproep onderaan ("Lees de notitie", "Bekijk het project") is alleen beeld.
+- **Carousels op de home:** alleen CSS, een rij met `scroll-snap` die je met vegen, het trackpad of het toetsenbord scrollt. Pijlen en stippen komen van `::scroll-button` en `::scroll-marker`, in browsers die dat kunnen; elders blijft de rij gewoon scrollbaar. Stippen verschijnen alleen als er iets te scrollen is.
 - **Code:** Shiki bij het bouwen, met beide thema's. CSS kiest het thema met `prefers-color-scheme`, net als `tokens.css`. Het lettertype is `--mv-font-mono`.
 - **JavaScript:** geen. De build bevat geen `<script>`; een test bewaakt dat.
 
