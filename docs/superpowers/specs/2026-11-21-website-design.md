@@ -204,7 +204,7 @@ LiteSpeed leest de Apache-regels in `.htaccess`. In deze volgorde:
 | Wanneer | Job | Stappen |
 |---|---|---|
 | Elke push en PR, en handmatig | `build` | Node volgens `.nvmrc`; `npm ci`; `npm run check`; `npm run build`; `npm test`. Bij een push naar `main` of handmatig: `dist/` als artifact bewaren. |
-| Push naar `main` als de repo-variabele `DEPLOY_ENABLED` `true` is, en handmatig vanaf `main` | `deploy` | Na `build`. Het artifact ophalen, `lftp` installeren, de map van het account controleren, uploaden in drie rondes, daarna de rooktest. |
+| Push naar `main` als de repo-variabele `DEPLOY_ENABLED` `true` is, en handmatig vanaf `main` | `deploy` | Na `build`. Het artifact ophalen, `lftp` installeren, de map van het account controleren, uploaden in drie rondes plus een vierde voor de `.htaccess`-bestanden, daarna de rooktest (met herhaalpogingen). |
 
 - **Rechten:** `contents: read`.
 - **`DEPLOY_ENABLED`** is een variabele van het repo (geen secret), zodat de voorwaarde van de job hem kan lezen. Zolang hij ontbreekt, uploadt een push naar `main` niets. Zo kan het bouwen beginnen voordat mijn.host klaar is, en is de eerste upload altijd een handmatige proefrun.
@@ -222,12 +222,15 @@ LiteSpeed leest de Apache-regels in `.htaccess`. In deze volgorde:
 - **Ronde 1:** `mirror --reverse dist/_astro _astro`, zonder verwijderen. Nieuwe bestanden met een hash staan klaar voordat de HTML ernaar verwijst.
 - **Ronde 2:** `mirror --reverse --delete --exclude-glob _astro/ --exclude-glob .well-known/ --exclude-glob cgi-bin/ dist/ .`. Wat niet meer in `dist/` staat, verdwijnt. `.well-known/` (het certificaat) en `cgi-bin/` (DirectAdmin) blijven staan.
 - **Ronde 3:** `mirror --reverse --delete dist/_astro _astro`: pas nu verdwijnen de oude bestanden in `_astro/`, als de HTML al naar de nieuwe verwijst.
+- Ronde 1 tot en met 3 gebruiken `--exclude '^[.]htaccess$'`: de `.htaccess` in `.` en in `_astro/` vervangen of verwijderen ze niet.
+- **Ronde 4:** per `.htaccess` (`_astro/.htaccess`, dan `.htaccess`) haalt de workflow het bestand op dat er staat. Is de inhoud gelijk aan `dist/`, dan blijft het staan; verschilt hij of ontbreekt het bestand, dan zet `put` het neer. Bij `dry_run` meldt hij alleen dat het bestand vervangen zou worden.
+  - Waarom: de build geeft elk bestand een nieuwe tijd, en `mirror` verwijdert een nieuwer bestand eerst en zet het dan opnieuw neer. Zo stond de site bij elke uitrol even zonder regels, en LiteSpeed past een nieuwe `.htaccess` soms pas later toe. Bij de uitrol van 22 november 2026 gaf `/article/…` daardoor 9 seconden na de upload nog 200 in plaats van 301, en faalde de rooktest; een paar minuten later klopte de redirect.
 - Alle rondes gebruiken `--no-perms`: de rechten komen van de server, niet van de build.
 - **Rooktest:**
   - `https://mvesign.com/` geeft 200 en bevat `<title>`;
   - `https://mvesign.com/article/sonarqube-serialization-pattern` geeft 301 met `Location: https://mvesign.com/notes/sonarqube-serialization-pattern/`.
 
-  Faalt de rooktest, dan faalt de job, en GitHub meldt dat. Bij `dry_run` slaat de workflow de rooktest over.
+  De rooktest probeert het tot twee minuten lang: 12 pogingen, om de 10 seconden. Zo krijgt LiteSpeed de tijd voor een gewijzigde `.htaccess`. Klopt het daarna nog niet, dan faalt de job, en GitHub meldt dat. Bij `dry_run` slaat de workflow de rooktest over.
 
 ### Secrets
 

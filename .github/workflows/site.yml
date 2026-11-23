@@ -77,7 +77,12 @@ jobs:
       # Ronde 1 zet de nieuwe bestanden in _astro/ klaar (nieuwe namen, dus geen botsing).
       # Ronde 2 zet de rest neer en verwijdert wat niet meer in dist/ staat, behalve _astro/,
       # .well-known/ (het certificaat) en cgi-bin/ (DirectAdmin). Ronde 3 ruimt pas daarna de
-      # oude bestanden in _astro/ op, als de HTML al naar de nieuwe verwijst. Het wachtwoord
+      # oude bestanden in _astro/ op, als de HTML al naar de nieuwe verwijst.
+      # De twee .htaccess-bestanden doen niet mee in die rondes: mirror verwijdert een bestand
+      # met een nieuwere tijd eerst en zet het dan opnieuw neer, en de build geeft elk bestand
+      # een nieuwe tijd. Dan staat de site bij elke uitrol even zonder regels, en LiteSpeed past
+      # een nieuwe .htaccess soms pas later toe. Ronde 4 vervangt een .htaccess daarom alleen als
+      # de inhoud verschilt van wat er staat (of als hij ontbreekt). Het wachtwoord
       # gaat via LFTP_PASSWORD, dus niet in het script en niet op de opdrachtregel. Alle paden
       # zijn relatief aan de map waar het account na het inloggen staat.
       - name: Uploaden via SFTP
@@ -121,24 +126,52 @@ jobs:
             exit 1
           fi
 
+          # --exclude '^[.]htaccess$' slaat alleen de .htaccess in de bovenste map van een ronde
+          # over; mirror vervangt en verwijdert die dan niet.
           cat > "$RUNNER_TEMP/upload.lftp" <<EOF
           source "$RUNNER_TEMP/connect.lftp"
-          mirror --reverse --no-perms --verbose $DRY_RUN dist/_astro _astro
-          mirror --reverse --no-perms --delete --verbose $DRY_RUN --exclude-glob _astro/ --exclude-glob .well-known/ --exclude-glob cgi-bin/ dist/ .
-          mirror --reverse --no-perms --delete --verbose $DRY_RUN dist/_astro _astro
+          mirror --reverse --no-perms --verbose $DRY_RUN --exclude '^[.]htaccess$' dist/_astro _astro
+          mirror --reverse --no-perms --delete --verbose $DRY_RUN --exclude '^[.]htaccess$' --exclude-glob _astro/ --exclude-glob .well-known/ --exclude-glob cgi-bin/ dist/ .
+          mirror --reverse --no-perms --delete --verbose $DRY_RUN --exclude '^[.]htaccess$' dist/_astro _astro
           EOF
           lftp -f "$RUNNER_TEMP/upload.lftp"
 
+          # Ronde 4: haal de .htaccess op die er staat, en vervang hem alleen als de inhoud
+          # verschilt. Lukt het ophalen niet (bijv. omdat hij ontbreekt), dan zet put hem neer;
+          # is de verbinding weg, dan faalt put, en daarmee de uitrol.
+          sync_htaccess() {
+            local path=$1 live="$RUNNER_TEMP/live.htaccess"
+            rm -f "$live"
+            printf 'source "%s"\nget %s -o "%s"\n' "$RUNNER_TEMP/connect.lftp" "$path" "$live" > "$RUNNER_TEMP/get.lftp"
+            lftp -f "$RUNNER_TEMP/get.lftp" > /dev/null 2>&1 || true
+            if [ -f "$live" ] && cmp -s "dist/$path" "$live"; then
+              echo "$path: ongewijzigd, blijft staan"
+            elif [ -n "$DRY_RUN" ]; then
+              echo "$path: zou worden vervangen (proefrun)"
+            else
+              printf 'source "%s"\nset xfer:clobber on\nput "dist/%s" -o %s\n' "$RUNNER_TEMP/connect.lftp" "$path" "$path" > "$RUNNER_TEMP/put.lftp"
+              lftp -f "$RUNNER_TEMP/put.lftp"
+              echo "$path: vervangen"
+            fi
+          }
+          sync_htaccess _astro/.htaccess
+          sync_htaccess .htaccess
+
+      # LiteSpeed past een nieuwe .htaccess soms pas na enige tijd toe. De rooktest probeert het
+      # daarom tot twee minuten lang (12 pogingen, om de 10 seconden) en faalt pas daarna.
       - name: Rooktest
         if: ${{ !inputs.dry_run }}
         run: |
-          code=$(curl -sS --max-time 30 -o "$RUNNER_TEMP/home.html" -w '%{http_code}' https://mvesign.com/)
-          if [ "$code" != "200" ] || ! grep -q '<title>' "$RUNNER_TEMP/home.html"; then
-            echo "::error::De home geeft status '$code' of heeft geen <title>"
-            exit 1
-          fi
-          result=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code} %{redirect_url}' https://mvesign.com/article/sonarqube-serialization-pattern)
-          if [ "$result" != "301 https://mvesign.com/notes/sonarqube-serialization-pattern/" ]; then
-            echo "::error::De redirect van /article/ geeft '$result'"
-            exit 1
-          fi
+          expected="301 https://mvesign.com/notes/sonarqube-serialization-pattern/"
+          for attempt in $(seq 1 12); do
+            code=$(curl -sS --max-time 30 -o "$RUNNER_TEMP/home.html" -w '%{http_code}' https://mvesign.com/ || true)
+            result=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code} %{redirect_url}' https://mvesign.com/article/sonarqube-serialization-pattern || true)
+            if [ "$code" = "200" ] && grep -q '<title>' "$RUNNER_TEMP/home.html" && [ "$result" = "$expected" ]; then
+              echo "Rooktest geslaagd bij poging $attempt"
+              exit 0
+            fi
+            echo "Poging $attempt: de home geeft '$code', de redirect van /article/ geeft '$result'"
+            if [ "$attempt" -lt 12 ]; then sleep 10; fi
+          done
+          echo "::error::Na 12 pogingen geeft de home '$code' (of heeft geen <title>), en de redirect van /article/ '$result'"
+          exit 1
