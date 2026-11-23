@@ -152,7 +152,7 @@ De schema's staan in `src/content.config.ts`. Mist een verplicht veld of heeft e
   - Links het woordmerk: `wordmark.svg` als `?raw` geïmporteerd en rechtstreeks in de HTML gezet. Bij aanwijzen krijgt `.mv` de kleur `--mv-accent`.
   - Rechts het menu in `--mv-on-bar`.
 - **Breedte:** de balk, de inhoud en de footer zijn hooguit 72rem breed, met een marge die meegroeit van 1 tot 2rem. (Tot 23 november 2026 was alles 46rem; op desktop bleef veel ruimte leeg.)
-- **Lezen:** lopende tekst blijft één kolom van ongeveer 70 tekens breed, die ook op een telefoon past.
+- **Lezen:** lopende tekst gebruikt de volle breedte van de inhoud en past ook op een telefoon. (Tot 23 november 2026 was lopende tekst ongeveer 70 tekens breed; in de bredere layout bleef rechts dan veel ruimte leeg.)
 - **Blokken:** de overzichten tonen een grid van blokken, drie naast elkaar op desktop. Een blok heeft één link, in de titel, die het hele blok bedekt; de oproep onderaan ("Lees de notitie", "Bekijk het project") is alleen beeld.
 - **Carousels op de home:** alleen CSS, een rij met `scroll-snap` die je met vegen, het trackpad of het toetsenbord scrollt. Pijlen en stippen komen van `::scroll-button` en `::scroll-marker`, in browsers die dat kunnen; elders blijft de rij gewoon scrollbaar. Stippen verschijnen alleen als er iets te scrollen is.
 - **Code:** Shiki bij het bouwen, met beide thema's. CSS kiest het thema met `prefers-color-scheme`, net als `tokens.css`. Het lettertype is `--mv-font-mono`.

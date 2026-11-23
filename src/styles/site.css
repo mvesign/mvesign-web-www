@@ -3,7 +3,7 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
-/* De breedte van de balk, de inhoud en de footer. Lopende tekst blijft smaller, zie .prose. */
+/* De breedte van de balk, de inhoud en de footer. Lopende tekst gebruikt dezelfde breedte. */
 :root {
   --wrap: 72rem;
   --gutter: clamp(1rem, 4vw, 2rem);
@@ -40,7 +40,6 @@ h2 { font-size: var(--mv-font-size-heading); font-weight: var(--mv-font-weight-b
 .bar a:hover, .bar a[aria-current="page"] { text-decoration: underline; text-underline-offset: 0.3em; }
 
 main { padding-block: 2.5rem 3rem; }
-.intro p, main > p { max-width: 70ch; }
 
 .footer { border-top: 1px solid var(--mv-line); }
 .footer ul { display: flex; flex-wrap: wrap; gap: 1.25rem; padding-block: 1.5rem; list-style: none; font-size: var(--mv-font-size-small); }
@@ -151,7 +150,7 @@ main { padding-block: 2.5rem 3rem; }
   .card, .card-cta span { transition: none; }
 }
 
-.prose { max-width: 70ch; overflow-wrap: break-word; }
+.prose { overflow-wrap: break-word; }
 .prose img { max-width: 100%; height: auto; }
 
 code { font-family: var(--mv-font-mono); font-size: var(--mv-font-size-code); }
