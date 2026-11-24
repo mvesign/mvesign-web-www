@@ -23,7 +23,7 @@ a { color: var(--mv-link); }
 a:focus-visible { outline: 3px solid var(--mv-accent); outline-offset: 2px; }
 
 h1, h2, h3 { color: var(--mv-text-strong); line-height: 1.25; }
-h1 { font-size: 1.9rem; font-weight: var(--mv-font-weight-extrabold); margin: 0 0 0.5rem; }
+h1 { font-size: 1.9rem; font-weight: var(--mv-font-weight-bold); margin: 0 0 0.5rem; }
 h2 { font-size: var(--mv-font-size-heading); font-weight: var(--mv-font-weight-bold); margin: 2rem 0 0.75rem; }
 
 .skip { position: absolute; left: -9999px; }
@@ -159,11 +159,13 @@ pre { padding: 1rem; overflow-x: auto; border: 1px solid var(--mv-line); border-
 
 .source-links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--mv-line); font-size: var(--mv-font-size-small); }
 
-/* Shiki zet de lichte kleuren inline en de donkere in --shiki-dark. */
+/* Shiki zet de lichte kleuren inline en de donkere in --shiki-dark. De achtergrond komt uit
+   de huisstijl, zodat codeblokken bij het palet passen. */
+.astro-code { background-color: var(--mv-surface) !important; }
+
 @media (prefers-color-scheme: dark) {
   .astro-code, .astro-code span {
     color: var(--shiki-dark) !important;
-    background-color: var(--shiki-dark-bg) !important;
     font-style: var(--shiki-dark-font-style) !important;
     font-weight: var(--shiki-dark-font-weight) !important;
     text-decoration: var(--shiki-dark-text-decoration) !important;
